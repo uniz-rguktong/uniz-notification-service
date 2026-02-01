@@ -9,25 +9,42 @@ const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 const connection = new IORedis(REDIS_URL, { maxRetriesPerRequest: null });
 
 const transporter = nodemailer.createTransport({
-    // Mock transport or use Env vars
-    host: process.env.SMTP_HOST || 'smtp.ethereal.email',
-    port: 587,
+    service: 'gmail',
     auth: {
-        user: process.env.SMTP_USER || 'user',
-        pass: process.env.SMTP_PASS || 'pass'
+      user: process.env.EMAIL_USER || 'noreplycampusschield@gmail.com',
+      pass: process.env.EMAIL_PASS || 'acix rfbi kujh xwtj'
     }
 });
 
+const emailTemplate = (title: string, content: string) => `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px;">
+    <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); padding: 30px; border-radius: 8px 8px 0 0;">
+      <h1 style="color: white; margin: 0; font-size: 24px;">🎓 UniZ Campus</h1>
+    </div>
+    <div style="padding: 30px;">
+      <h2 style="color: #1f2937; margin-top: 0;">${title}</h2>
+      <div style="color: #4b5563; line-height: 1.6;">
+        ${content}
+      </div>
+      <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+      <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+        This is an automated email from UniZ Campus Management System.<br>
+        Please do not reply to this email.
+      </p>
+    </div>
+  </div>
+`;
+
 const worker = new Worker('notification-queue', async job => {
   console.log(`Processing job ${job.id}: ${job.name}`);
-  const { type, recipient, subject, body } = job.data;
+  const { type, recipient, subject, body, html } = job.data;
 
   if (type === 'EMAIL') {
       await transporter.sendMail({
-          from: '"UniZ System" <no-reply@uniz.edu>',
+          from: '"UniZ Campus" <noreplycampusschield@gmail.com>',
           to: recipient,
           subject: subject,
-          text: body,
+          html: html || emailTemplate(subject, `<p>${body}</p>`),
       });
       console.log(`Email sent to ${recipient}`);
   }
