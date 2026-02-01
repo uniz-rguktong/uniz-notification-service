@@ -41,4 +41,20 @@ worker.on('failed', (job, err) => {
   console.log(`${job?.id} has failed with ${err.message}`);
 });
 
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+
+const app = express();
+app.use(helmet());
+app.use(cors());
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', service: 'uniz-notification-service' });
+});
+
+app.listen(3007, () => {
+    console.log('Notification Service Worker & Health Server Started on 3007');
+});
+
 console.log('Notification Service Worker Started');
