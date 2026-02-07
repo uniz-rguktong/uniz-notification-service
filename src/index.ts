@@ -12,11 +12,18 @@ dotenv.config();
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 const connection = new IORedis(REDIS_URL, { maxRetriesPerRequest: null });
 
+const emailUser = process.env.EMAIL_USER;
+const emailPass = process.env.EMAIL_PASS;
+
+if (process.env.NODE_ENV === "production" && (!emailUser || !emailPass)) {
+  throw new Error("EMAIL_USER and EMAIL_PASS are required in production");
+}
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER || "noreplycampusschield@gmail.com",
-    pass: process.env.EMAIL_PASS || "acix rfbi kujh xwtj",
+    user: emailUser || "noreplycampusschield@gmail.com",
+    pass: emailPass || "acix rfbi kujh xwtj",
   },
 });
 
