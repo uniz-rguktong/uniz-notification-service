@@ -11,12 +11,15 @@ dotenv.config();
 
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 const connection = new IORedis(REDIS_URL, { maxRetriesPerRequest: null });
+connection.on("error", (err) => console.error("Redis connection error:", err));
 
 const emailUser = process.env.EMAIL_USER;
 const emailPass = process.env.EMAIL_PASS;
 
 if (process.env.NODE_ENV === "production" && (!emailUser || !emailPass)) {
-  throw new Error("EMAIL_USER and EMAIL_PASS are required in production");
+  console.warn(
+    "⚠️ EMAIL_USER and EMAIL_PASS are not set. Service will use fallback credentials.",
+  );
 }
 
 const transporter = nodemailer.createTransport({
